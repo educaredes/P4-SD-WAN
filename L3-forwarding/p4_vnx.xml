@@ -76,7 +76,6 @@ SPAIN
     <filetree seq="on_boot" root="/root/">start_s1.sh</filetree>
     <exec seq="on_boot" type="verbatim" ostype="system"> 
       sleep 3
-      export PATH=$PATH:/behavioral-model/targets/simple_switch_grpc/
       tmux new-session -d -s switch1 simple_switch_grpc --no-p4 \
         -i 1@eth1 -i 2@eth2 --thrift-port 9090 --device-id 1
               
@@ -104,7 +103,6 @@ SPAIN
     
     <exec seq="on_boot" type="verbatim" ostype="system"> 
       sleep 3
-      cd /behavioral-model/targets/simple_switch_grpc/
       tmux new-session -d -s switch2 simple_switch_grpc --no-p4 \
         -i 1@eth1 -i 2@eth2 --thrift-port 9091 --device-id 2
               
