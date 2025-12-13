@@ -41,13 +41,13 @@ SPAIN
   </global>
 
   <net name="Net0" mode="virtual_bridge" />
-  <net name="Net1" mode="virtual_bridge" />
-  <net name="Net2" mode="virtual_bridge" />
-  <net name="Net3" mode="virtual_bridge" />
+  <net name="s1_h1" mode="veth" type="p2p" />
+  <net name="s2_h2" mode="veth" type="p2p" />
+  <net name="s1_s2" mode="veth" type="p2p" />
 
   <vm name="h1" type="lxc" arch="x86_64">
     <filesystem type="cow">/usr/share/vnx/filesystems/rootfs_lxc_ubuntu64</filesystem>
-    <if id="1" net="Net1">
+    <if id="1" net="s1_h1">
       <ipv4>10.0.0.1/24</ipv4>          
     </if>
     <route type="ipv4" gw="10.0.0.254">default</route>
@@ -55,7 +55,7 @@ SPAIN
 
   <vm name="h2" type="lxc" arch="x86_64">
     <filesystem type="cow">/usr/share/vnx/filesystems/rootfs_lxc_ubuntu64</filesystem>
-    <if id="1" net="Net2">
+    <if id="1" net="s2_h2">
       <ipv4>10.1.0.2/24</ipv4>      
     </if>
     <route type="ipv4" gw="10.1.0.254">default</route>
@@ -63,11 +63,10 @@ SPAIN
 
   <vm name="s1" type="lxc" arch="x86_64">
     <filesystem type="cow">/usr/share/vnx/filesystems/rootfs_lxc_ubuntu64</filesystem>
-    <if id="1" net="Net1">
+    <if id="1" net="s1_h1">
       <ipv4>10.0.0.254/24</ipv4>
     </if>
-    <if id="2" net="Net3">
-      <ipv4>192.168.1.1/24</ipv4>
+    <if id="2" net="s1_s2">
     </if>
     <if id="3" net="Net0">
       <ipv4>172.17.2.1/24</ipv4>
@@ -81,18 +80,14 @@ SPAIN
               
       echo "Switch iniciado" &gt;&gt; /root/start_s1.log;
     </exec>
-
-    
-        
   </vm>
 
   <vm name="s2" type="lxc" arch="x86_64">
     <filesystem type="cow">/usr/share/vnx/filesystems/rootfs_lxc_ubuntu64</filesystem>
-    <if id="1" net="Net2">
+    <if id="1" net="s2_h2">
       <ipv4>10.1.0.254/24</ipv4>
     </if>
-    <if id="2" net="Net3">
-      <ipv4>192.168.1.2/24</ipv4>
+    <if id="2" net="s1_s2">
     </if>
     <if id="3" net="Net0">
       <ipv4>172.17.2.2/24</ipv4>
@@ -112,7 +107,6 @@ SPAIN
   <host>
     <hostif net="Net0">
       <ipv4>172.17.2.100/24</ipv4>
-      
     </hostif>
   </host>
 </vnx>

@@ -41,80 +41,63 @@ SPAIN
   </global>
 
   <net name="Net0" mode="virtual_bridge" />
-  <net name="Net1" mode="virtual_bridge" />
-  <net name="Net2" mode="virtual_bridge" />
-  <net name="Net3" mode="virtual_bridge" />
+  <net name="s1_h1" mode="veth" type="p2p" />
+  <net name="s2_h2" mode="veth" type="p2p" />
+  <net name="s1_s2" mode="veth" type="p2p" />
 
   <vm name="h1" type="lxc" arch="x86_64">
     <filesystem type="cow">/usr/share/vnx/filesystems/rootfs_lxc_ubuntu64</filesystem>
-    <if id="1" net="Net1">
+    <if id="1" net="s1_h1">
       <ipv4>10.0.0.1/24</ipv4>          
     </if>
-    <exec seq="on_boot" type="verbatim" ostype="system"> arp -s 10.0.0.2 02:fd:00:00:01:01</exec>  
-      
+    <exec seq="on_boot" type="verbatim" ostype="system">
+      sleep 3
+      arp -s 10.0.0.2 02:fd:00:00:01:01
+    </exec>
   </vm>
 
   <vm name="h2" type="lxc" arch="x86_64">
     <filesystem type="cow">/usr/share/vnx/filesystems/rootfs_lxc_ubuntu64</filesystem>
-    <if id="1" net="Net2">
+    <if id="1" net="s2_h2">
       <ipv4>10.0.0.2/24</ipv4>      
     </if>
-    <exec seq="on_boot" type="verbatim" ostype="system"> arp -s 10.0.0.1 02:fd:00:00:00:01</exec>
-    
+    <exec seq="on_boot" type="verbatim" ostype="system">
+      sleep 3
+      arp -s 10.0.0.1 02:fd:00:00:00:01
+    </exec>
   </vm>
 
   <vm name="s1" type="lxc" arch="x86_64">
     <filesystem type="cow">/usr/share/vnx/filesystems/rootfs_lxc_ubuntu64</filesystem>
-    <if id="1" net="Net1">
-      
-    </if>
-    <if id="2" net="Net3">
-      
-    </if>
+    <if id="1" net="s1_h1" />
+    <if id="2" net="s1_s2" />
     <if id="3" net="Net0">
       <ipv4>172.17.2.1/24</ipv4>
     </if>
-    <!-- Generar un PATH para ejecutar el switch desde la raiz del sistema -->
-    <filetree seq="on_boot" root="/root/">start_s1.sh </filetree>
     <exec seq="on_boot" type="verbatim" ostype="system"> 
       sleep 3
-      export PATH=$PATH:/behavioral-model/targets/simple_switch_grpc/
       tmux new-session -d -s switch1 simple_switch_grpc --no-p4 \
         -i 1@eth1 -i 2@eth2 --thrift-port 9090 --device-id 1
-              
-      echo "Switch iniciado" &gt;&gt; /root/start_s1.log;
     </exec>
-       
   </vm>
 
   <vm name="s2" type="lxc" arch="x86_64">
     <filesystem type="cow">/usr/share/vnx/filesystems/rootfs_lxc_ubuntu64</filesystem>
-    <if id="1" net="Net2">
-      
-    </if>
-    <if id="2" net="Net3">
-      
-    </if>
+    <if id="1" net="s2_h2" />
+    <if id="2" net="s1_s2" />
     <if id="3" net="Net0">
       <ipv4>172.17.2.2/24</ipv4>
     </if>
     
-    <filetree seq="on_boot" root="/root/"> start_s2.sh </filetree>
-    <exec seq="ss2" type="verbatim" ostype="system">/root/start_s2.sh </exec>
-    
     <exec seq="on_boot" type="verbatim" ostype="system"> 
       sleep 3
-      cd /behavioral-model/targets/simple_switch_grpc/
       tmux new-session -d -s switch2 simple_switch_grpc --no-p4 \
         -i 1@eth1 -i 2@eth2 --thrift-port 9091 --device-id 2
-              
-      echo "Switch iniciado" &gt;&gt; /root/start_s2.log;
     </exec>               
   </vm>
   <host>
     <hostif net="Net0">
       <ipv4>172.17.2.100/24</ipv4>
-      
     </hostif>
   </host>
 </vnx>
